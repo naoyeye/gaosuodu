@@ -13,14 +13,14 @@ console.log(app.get('env'))
 if (app.get('env') !== 'development') {
   app.use(logger('dev'));
 } else {
-  app.use(logger('tiny'));
+  // app.use(logger('tiny'));
 }
 
 // Registry Raven
-var raven = require('raven');
-if (app.get('env') !== 'development') {
-  app.use(raven.middleware.express.requestHandler('https://047890161f7a415eaef901fead0bcf4e:0f08b43938bd4cc982ee1a90db620d5f@app.getsentry.com/76821'));
-}
+// var raven = require('raven');
+// if (app.get('env') !== 'development') {
+//   app.use(raven.middleware.express.requestHandler('https://047890161f7a415eaef901fead0bcf4e:0f08b43938bd4cc982ee1a90db620d5f@app.getsentry.com/76821'));
+// }
 
 // app.use('/favicon.ico', function (req, res, next) {
 //   res.redirect('//www.gaosuodu.com/favicon.ico');
