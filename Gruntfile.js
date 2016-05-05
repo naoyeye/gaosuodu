@@ -401,7 +401,7 @@ module.exports = function (grunt) {
         'htmlmin:dist',
         'copy:public',
         // 'compress:gzip',
-        // 'copy:modules',
+        'copy:modules',
         'clean:afterBuild'
     ]);
 
