@@ -54,9 +54,9 @@ app.use(function(req, res, next) {
 });
 
 // error handlers
-if (app.get('env') !== 'development') {
-  app.use(raven.middleware.express.errorHandler('https://047890161f7a415eaef901fead0bcf4e:0f08b43938bd4cc982ee1a90db620d5f@app.getsentry.com/76821'));
-}
+// if (app.get('env') !== 'development') {
+//   app.use(raven.middleware.express.errorHandler('https://047890161f7a415eaef901fead0bcf4e:0f08b43938bd4cc982ee1a90db620d5f@app.getsentry.com/76821'));
+// }
 
 // development error handler
 // will print stacktrace
