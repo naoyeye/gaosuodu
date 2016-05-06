@@ -30,6 +30,8 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 
+console.log(1)
+
 // Registry Modules
 if (app.get('env') !== 'development') {
     app.set('views', 'views');
@@ -39,10 +41,13 @@ if (app.get('env') !== 'development') {
     app.use(express.static('.tmp'));
 }
 
+console.log(2)
+
 var mustacheExpress = require('mustache-express');
 app.engine('html', mustacheExpress());
 app.set('view engine', 'html');
 
+console.log(3)
 
 app.use('/', require('./routes/routes'));
 
@@ -52,6 +57,8 @@ app.use(function(req, res, next) {
   err.status = 404;
   next(err);
 });
+
+console.log(4)
 
 // error handlers
 // if (app.get('env') !== 'development') {
@@ -71,6 +78,8 @@ if (app.get('env') === 'development') {
   });
 }
 
+console.log(5)
+
 // production error handler
 // no stacktraces leaked to user
 app.use(function(err, req, res, next) {
@@ -81,5 +90,7 @@ app.use(function(err, req, res, next) {
     error: {}
   });
 });
+
+console.log(6)
 
 module.exports = app;
