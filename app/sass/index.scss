@@ -334,6 +334,10 @@ footer {
     nav {
       float: none;
       text-align: center;
+
+      li {
+        padding: 0 5px;
+      }
     }
   }
 
@@ -356,6 +360,10 @@ footer {
       @include translate3d(0, 0, 0);
       position: static;
     }
+  }
+
+  .main {
+    padding: 0 10px 40px 10px;
   }
 
   #wall {

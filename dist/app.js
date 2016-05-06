@@ -8,8 +8,6 @@ var app = express();
 app.disable('x-powered-by');
 app.disable('etag');
 
-console.log(app.get('env'))
-
 if (app.get('env') !== 'development') {
   app.use(logger('dev'));
 } else {
