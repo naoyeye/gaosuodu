@@ -33,6 +33,8 @@ function normalizePort (val) {
  * Get port from environment and store in Express.
  */
 var port = normalizePort(process.env.PORT || '8081');
+
+console.log('port = ', port)
 app.set('port', port);
 
 /**
@@ -70,22 +72,27 @@ function onListening() {
   debug('Listening on ' + bind);
 }
 
-if (cluster.isMaster && app.get('env') !== 'development') {
-  var cpuCount = require('os').cpus().length;
-  var i;
-  for (i = 0; i < cpuCount - 1; i++) {
-    cluster.fork();
-  }
-} else {
-  /**
-   * Create HTTP server.
-   */
-  server = http.createServer(app);
+/**
+ * Create HTTP server.
+ */
+server = http.createServer(app);
 
-  /**
-   * Listen on provided port, on all network interfaces.
-   */
-  server.listen(port);
-  server.on('error', onError);
-  server.on('listening', onListening);
-}
+/**
+ * Listen on provided port, on all network interfaces.
+ */
+server.listen(port);
+server.on('error', onError);
+server.on('listening', onListening);
+
+// if (cluster.isMaster && app.get('env') !== 'development') {
+//   var cpuCount = require('os').cpus().length;
+//   var i;
+//   for (i = 0; i < cpuCount - 1; i++) {
+//     cluster.fork();
+//   }
+// } else {
+//   server = http.createServer(app);
+//   server.listen(port);
+//   server.on('error', onError);
+//   server.on('listening', onListening);
+// }
