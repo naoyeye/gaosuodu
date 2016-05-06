@@ -37,8 +37,10 @@ if (app.get('env') !== 'development') {
     app.set('views', 'views');
     app.use(express.static('public'));
 } else {
-    app.set('views','app/views');
-    app.use(express.static('.tmp'));
+    // app.set('views','app/views');
+    // app.use(express.static('.tmp'));
+    app.set('views', 'views');
+    app.use(express.static('public'));
 }
 
 console.log(2)
