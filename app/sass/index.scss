@@ -147,8 +147,9 @@ header {
         @include opacity(1);
         @include inline-block;
         @include single-transition(background-size, 0.1s, linear);
-        width: 100px;
-        height: 100px;
+        width: 80px;
+        height: 80px;
+        margin: 10px;
         background: center center no-repeat;
         background-size: 120% 120%;
 
