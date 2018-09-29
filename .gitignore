@@ -10,6 +10,5 @@ app/components
 test/output
 gzip
 .sass-cache
-.tmp
 bower_components
 
