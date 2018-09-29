@@ -2,7 +2,7 @@
 * @Author: hanjiyun
 * @Date:   2018-07-21 13:36:22
 * @Last Modified by:   hanjiyun
-* @Last Modified time: 2018-09-29 14:15:11
+* @Last Modified time: 2018-09-29 14:21:45
 */
 
 
@@ -142,7 +142,7 @@ app.use(function(err, req, res, next) {
 });
 
 
-var PORT = parseInt(process.env.PORT || 3100);
+var PORT = parseInt(process.env.PORT || 8081);
 
 app.listen(PORT, function (err) {
   console.log('Node app is running on port:', PORT);
