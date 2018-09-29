@@ -30,8 +30,10 @@ app.use(cookieParser());
 
 // Registry Modules
 if (app.get('env') === 'production') {
-    app.set('views', 'views');
-    app.use(express.static('public'));
+    // app.set('views', 'views');
+    // app.use(express.static('public'));
+    app.set('views', 'app/views');
+    app.use(express.static('.tmp'));
 } else {
     app.set('views','app/views');
     app.use(express.static('.tmp'));
