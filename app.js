@@ -1,86 +1,158 @@
-var express = require('express');
-var logger = require('morgan');
-var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
+/*
+* @Author: hanjiyun
+* @Date:   2018-07-21 13:36:22
+* @Last Modified by:   hanjiyun
+* @Last Modified time: 2018-09-29 14:15:11
+*/
 
+
+var express = require('express');
 var app = express();
+var path = require('path');
+var timeout = require('connect-timeout');
+var bodyParser = require('body-parser');
+var compression = require('compression')
+var swig = require('swig')
+var cors = require('cors')
+var sassMiddleware = require('node-sass-middleware');
+var postcssMiddleware = require('postcss-middleware');
+var autoprefixer = require('autoprefixer');
 
 app.disable('x-powered-by');
-app.disable('etag');
 
-if (app.get('env') !== 'development') {
-  app.use(logger('dev'));
-} else {
-  app.use(logger('tiny'));
-}
+// Enable CORS with various options
+// https://github.com/expressjs/cors
+// app.use(cors())
 
-// Registry Raven
-var raven = require('raven');
-if (app.get('env') === 'production') {
-  app.use(raven.middleware.express.requestHandler('https://047890161f7a415eaef901fead0bcf4e:0f08b43938bd4cc982ee1a90db620d5f@app.getsentry.com/76821'));
-}
+// 设置默认超时时间
+app.use(timeout('15s'));
 
-// app.use('/favicon.ico', function (req, res, next) {
-//   res.redirect('//www.gaosuodu.com/favicon.ico');
-// });
+// gzip
+app.use(compression())
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(cookieParser());
 
-// Registry Modules
-if (app.get('env') === 'production') {
-    // app.set('views', 'views');
-    // app.use(express.static('public'));
-    app.set('views', 'app/views');
-    app.use(express.static('.tmp'));
-} else {
-    app.set('views','app/views');
-    app.use(express.static('.tmp'));
-    // app.set('views', 'views');
-    // app.use(express.static('public'));
-}
-
-var mustacheExpress = require('mustache-express');
-app.engine('html', mustacheExpress());
+// 设置模板引擎
+app.engine('html', swig.renderFile);
 app.set('view engine', 'html');
 
-app.use('/', require('./routes/routes'));
+// 静态文件目录
+app.use(express.static('public'));
 
-// catch 404 and forward to error handler
-app.use(function(req, res, next) {
-  var err = new Error('Not Found');
-  err.status = 404;
-  next(err);
+// 开发时不用缓存
+app.set('view cache', false);
+swig.setDefaults({ cache: false });
+
+// // 后端 API
+// var CommentAPI = require('./api/comment');
+// // 可以将一类的路由单独保存在一个文件中
+// app.use('/api/comment', CommentAPI);
+
+
+// 样式
+var srcPath = path.join(__dirname, 'app/scss');
+var destPath = path.join(__dirname, 'public/dist/css');
+app.use('/stylesheets', sassMiddleware({
+    /* Options */
+    src: srcPath,
+    dest: destPath,
+    debug: false,
+    outputStyle: 'compressed',
+    // prefix:  '/prefix'  // Where prefix is at <link rel="stylesheets" href="prefix/style.css"/>
+}));
+app.use('/stylesheets', postcssMiddleware({
+  plugins: [
+    // Plugins
+    autoprefixer({
+      browsers: [
+        "ie 8",
+        "safari >= 3",
+        "chrome >= 34"
+      ]
+    })
+  ],
+  src: function(req) {
+    return path.join(destPath, req.url);
+  }
+}));
+
+
+// 后端渲染
+// 首页
+app.get('/', function(req, res) {
+  var viewdata = {
+//     currentTime: new Date() + '',
+
+//     comments: [{
+//       user_name: '小张',
+//       comment: '这是一条留言'
+//     }, {
+//       user_name: '小王',
+//       comment: '这是一条留言'
+//     }]
+  };
+
+  res.render(`${__dirname}/app/templates/index.html`, viewdata);
 });
+
+app.get('/works', function(req, res) {
+  res.render(`${__dirname}/app/templates/works.html`);
+});
+
+app.get('/exhibition', function(req, res) {
+  res.render(`${__dirname}/app/templates/exhibition.html`);
+});
+
+app.get('/resume', function(req, res) {
+  res.render(`${__dirname}/app/templates/resume.html`);
+});
+
+app.get('/contact', function(req, res) {
+  res.render(`${__dirname}/app/templates/contact.html`);
+});
+
+
 
 // error handlers
-if (app.get('env') === 'production') {
-  app.use(raven.middleware.express.errorHandler('https://047890161f7a415eaef901fead0bcf4e:0f08b43938bd4cc982ee1a90db620d5f@app.getsentry.com/76821'));
-}
-
-// development error handler
-// will print stacktrace
-if (app.get('env') === 'development') {
-  app.use(function(err, req, res, next) {
-    res.status(err.status || 500);
-
-    res.json({
-      message: err.message,
-      error: err.stack
-    });
-  });
-}
-
-// production error handler
-// no stacktraces leaked to user
 app.use(function(err, req, res, next) {
-  res.status(err.status || 500);
+  if (req.timedout && req.headers.upgrade === 'websocket') {
+    // 忽略 websocket 的超时
+    return;
+  }
 
-  res.json({
+  var statusCode = err.status || 500;
+  if (statusCode === 500) {
+    console.error(err.stack || err);
+  }
+  if (req.timedout) {
+    console.error('请求超时: url=%s, timeout=%d, 请确认方法执行耗时很长，或没有正确的 response 回调。', req.originalUrl, err.timeout);
+  }
+  res.status(statusCode);
+  // 默认不输出异常详情
+  var error = {};
+  if (app.get('env') === 'development') {
+    // 如果是开发环境，则将异常堆栈输出到页面，方便开发调试
+    error = err;
+  }
+  res.render(`${__dirname}/app/templates/error.html`, {
     message: err.message,
-    error: {}
+    error: error
   });
 });
 
-module.exports = app;
+
+var PORT = parseInt(process.env.PORT || 3100);
+
+app.listen(PORT, function (err) {
+  console.log('Node app is running on port:', PORT);
+
+  // 注册全局未捕获异常处理器
+  process.on('uncaughtException', function(err) {
+    console.error('Caught exception:', err.stack);
+  });
+  process.on('unhandledRejection', function(reason, p) {
+    console.error('Unhandled Rejection at: Promise ', p, ' reason: ', reason.stack);
+  });
+});
+
